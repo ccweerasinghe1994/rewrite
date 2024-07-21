@@ -13,13 +13,14 @@ pipeline {
             }
         }
         stage('Test') {
-            when {
-                expression{
-                    env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'develop'
-                }
-            }
+//             when {
+//                 expression{
+//                     env.BRANCH_NAME == 'main' || env.BRANCH_NAME == 'develop'
+//                 }
+//             }
             steps {
                 echo 'Testing..'
+                echo 'BRANCH_NAME: ' + env.BRANCH_NAME
             }
         }
         stage('Deploy') {
