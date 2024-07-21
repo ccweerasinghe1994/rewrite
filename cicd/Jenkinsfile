@@ -4,12 +4,18 @@ pipeline {
      environment {
             // Manually define BRANCH_NAME if not set by Jenkins environment
             BRANCH_NAME = "${env.BRANCH_NAME ?: 'main'}"
+            SERVER_CREDENTIALS = credentials('server-credentials')
      }
 
     stages {
         stage('Build') {
+
+            when {
+                expression { BRANCH_NAME == 'main' }
+            }
             steps {
                 echo "Building.. in Branch: ${BRANCH_NAME}"
+                echo "Credentials: ${SERVER_CREDENTIALS}"
             }
         }
         stage('Test') {
@@ -20,6 +26,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying....'
+                withCredentials([usernamePassword(credentialsId: 'server-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                    echo "Deploying to server with username: ${USERNAME} and password: ${PASSWORD}"
+                }
             }
         }
     }
