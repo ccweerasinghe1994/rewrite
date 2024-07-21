@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+     environment {
+            // Manually define BRANCH_NAME if not set by Jenkins environment
+            BRANCH_NAME = "${env.BRANCH_NAME ?: 'main'}"
+     }
+
     stages {
         stage('Build') {
             steps {
