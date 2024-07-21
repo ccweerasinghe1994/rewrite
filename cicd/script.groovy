@@ -1,5 +1,7 @@
 def buildApp() {
     echo "Building.. in Branch: ${BRANCH_NAME}"
+//    let's build the app here
+    sh 'mvn clean package'
 }
 
 def testApp() {
