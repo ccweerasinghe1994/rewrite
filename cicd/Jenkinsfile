@@ -51,7 +51,6 @@ pipeline {
             }
         }
 
-        }
         stage('Test') {
 
             when {
