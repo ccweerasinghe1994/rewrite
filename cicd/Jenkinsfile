@@ -65,14 +65,15 @@ pipeline {
 
         }
 
-        stage('Check Vulnerability Report Existence') {
+        stage('Print Vulnerability Report Existence') {
             steps {
                 script {
                     def reportExists = sh(script: "find ./target -type f -name 'org.openrewrite.java.dependencies.table.VulnerabilityReport.csv'", returnStdout: true).trim()
                     if (reportExists) {
                         echo 'Vulnerability report found'
                         HAS_VANUARABLE_DEPENDENCIES = true
-
+                        // Display the contents of the vulnerability report
+                        sh "cat \$(find ./target -type f -name 'org.openrewrite.java.dependencies.table.VulnerabilityReport.csv')"
                     } else {
                         echo 'No vulnerability report found'
                     }
