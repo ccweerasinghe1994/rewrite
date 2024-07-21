@@ -21,6 +21,15 @@ pipeline {
      }
 
     stages {
+        stage('Init'){
+            steps {
+                echo "Init.."
+                script {
+                    gv = load('cicd/script.groovy')
+                }
+            }
+        }
+
         stage('Build') {
 
             when {
@@ -43,6 +52,8 @@ pipeline {
             }
         }
 
+
+
         stage('generate vulnerabilities report') {
 
             steps {
@@ -61,6 +72,7 @@ pipeline {
                     if (reportExists) {
                         echo 'Vulnerability report found'
                         HAS_VANUARABLE_DEPENDENCIES = true
+
                     } else {
                         echo 'No vulnerability report found'
                     }
