@@ -1,4 +1,4 @@
-import groovy.json.JsonOutput
+
 def gv
 
 pipeline {
@@ -115,51 +115,91 @@ pipeline {
 //             }
 //         }
 
-                stage('convert Vulnerability Report to markdown') {
-                    steps {
-                        script {
-                            def reportPath = sh(script: "find ./target -type f -name 'org.openrewrite.java.dependencies.table.VulnerabilityReport.csv'", returnStdout: true).trim()
-                            if (reportPath) {
-                                echo 'Vulnerability report found'
-                                HAS_VANUARABLE_DEPENDENCIES = true
+//                 stage('convert Vulnerability Report to markdown') {
+//                     steps {
+//                         script {
+//                             def reportPath = sh(script: "find ./target -type f -name 'org.openrewrite.java.dependencies.table.VulnerabilityReport.csv'", returnStdout: true).trim()
+//                             if (reportPath) {
+//                                 echo 'Vulnerability report found'
+//                                 HAS_VANUARABLE_DEPENDENCIES = true
+//
+//                                 // Read CSV file
+//                                 def csvContent = readFile(reportPath)
+//                                 def lines = csvContent.split('\n')
+//                                 def headers = lines[0].split(',')
+//                                 def markdown = ''
+//
+//                                 // Convert CSV to markdown
+//                                 headers.each { header ->
+//                                     markdown += "| ${header} "
+//                                 }
+//                                 markdown += "|\n"
+//                                 headers.each { header ->
+//                                     markdown += "| --- "
+//                                 }
+//                                 markdown += "|\n"
+//
+//                                 lines.tail().each { line ->
+//                                     def data = line.split(',')
+//                                     headers.eachWithIndex { header, idx ->
+//                                         markdown += "| ${data[idx].trim()} "
+//                                     }
+//                                     markdown += "|\n"
+//                                 }
+//
+//                                 // Output markdown
+//                                 echo markdown
+//                             } else {
+//                                 echo 'No vulnerability report found'
+//                             }
+//                         }
+//                     }
+//                 }
+stage('convert Vulnerability Report to markdown') {
+    steps {
+        script {
+            def reportPath = sh(script: "find ./target -type f -name 'org.openrewrite.java.dependencies.table.VulnerabilityReport.csv'", returnStdout: true).trim()
+            if (reportPath) {
+                echo 'Vulnerability report found'
+                HAS_VANUARABLE_DEPENDENCIES = true
 
-                                // Read CSV file
-                                def csvContent = readFile(reportPath)
-                                def lines = csvContent.split('\n')
-                                def headers = lines[0].split(',')
-                                def markdown = ''
+                // Read CSV file
+                def csvContent = readFile(reportPath)
+                def lines = csvContent.split('\n')
+                def headers = lines[0].split(',')
+                def markdown = ''
 
-                                // Convert CSV to markdown
-                                headers.each { header ->
-                                    markdown += "| ${header} "
-                                }
-                                markdown += "|\n"
-                                headers.each { header ->
-                                    markdown += "| --- "
-                                }
-                                markdown += "|\n"
+                // Convert CSV to markdown in a single line
+                headers.each { header ->
+                    markdown += "| ${header.trim()} "
+                }
+                markdown += "| "
+                headers.each { header ->
+                    markdown += "| --- "
+                }
+                markdown += "| "
 
-                                lines.tail().each { line ->
-                                    def data = line.split(',')
-                                    headers.eachWithIndex { header, idx ->
-                                        markdown += "| ${data[idx].trim()} "
-                                    }
-                                    markdown += "|\n"
-                                }
-
-                                // Output markdown
-                                echo markdown
-
-
-
-
-                            } else {
-                                echo 'No vulnerability report found'
-                            }
+                lines.drop(1).each { line -> // Using drop(1) instead of tail() to avoid script security restrictions
+                    def data = line.split(',')
+                    headers.eachWithIndex { header, idx ->
+                        if (idx < data.size()) {
+                            markdown += "| ${data[idx].trim()} "
                         }
                     }
+                    markdown += "| "
                 }
 
+                // Compress to a single line by removing all newline characters
+                String singleLineMarkdown = markdown.replaceAll("\n", " ")
+
+                // Output markdown
+                echo singleLineMarkdown
+            } else {
+                echo 'No vulnerability report found'
+            }
+        }
+    }
+}
 
     }
 
