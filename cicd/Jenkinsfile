@@ -80,6 +80,41 @@ pipeline {
                 }
             }
         }
+        stage('Print Vulnerability Report in JSON') {
+            steps {
+                script {
+                    def reportPath = sh(script: "find ./target -type f -name 'org.openrewrite.java.dependencies.table.VulnerabilityReport.csv'", returnStdout: true).trim()
+                    if (reportPath) {
+                        echo 'Vulnerability report found'
+                        HAS_VANUARABLE_DEPENDENCIES = true
+
+                        // Read CSV file
+                        def csvContent = readFile(reportPath)
+                        def lines = csvContent.split('\n')
+                        def headers = lines[0].split(',')
+                        def jsonList = []
+
+                        // Convert CSV to JSON
+                        lines.tail().each { line ->
+                            def data = line.split(',')
+                            def jsonObject = [:]
+                            headers.eachWithIndex { header, idx ->
+                                jsonObject[header.trim()] = data[idx].trim()
+                            }
+                            jsonList << jsonObject
+                        }
+
+                        // Output JSON
+                        echo JsonOutput.toJson(jsonList)
+
+                    } else {
+                        echo 'No vulnerability report found'
+                    }
+                }
+            }
+        }
+
+
     }
 
     post {
