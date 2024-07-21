@@ -94,12 +94,15 @@ pipeline {
                         def headers = lines[0].split(',')
                         def jsonList = []
 
-                        // Convert CSV to JSON
-                        lines.tail().each { line ->
+                        // Convert CSV to JSON, manually skipping the first line (header)
+                        for (int i = 1; i < lines.size(); i++) {
+                            def line = lines[i]
                             def data = line.split(',')
                             def jsonObject = [:]
                             headers.eachWithIndex { header, idx ->
-                                jsonObject[header.trim()] = data[idx].trim()
+                                if (idx < data.size()) { // Check to prevent index out of bounds
+                                    jsonObject[header.trim()] = data[idx].trim()
+                                }
                             }
                             jsonList << jsonObject
                         }
