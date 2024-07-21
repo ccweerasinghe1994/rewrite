@@ -52,6 +52,8 @@ pipeline {
             }
         }
 
+
+
         stage('generate vulnerabilities report') {
 
             steps {
@@ -59,34 +61,52 @@ pipeline {
                     echo 'Checking for vulnerabilities'
                     sh 'mvn rewrite:run'
                 }
+
+                if (fileExists('target/rewrite/datatables/*/org.openrewrite.java.dependencies.table.VulnerabilityReport.csv')) {
+                    echo 'Vulnerabilities found'
+                    HAS_VANUARABLE_DEPENDENCIES = true
+                } else {
+                    echo 'No vulnerabilities found'
+                }
+
             }
 
         }
 
-        stage('read the vulnerabilities report') {
-//             if (fileExists('target/rewrite/datatables/*/org.openrewrite.java.dependencies.table.VulnerabilityReport.csv')) {
-//                 echo 'Vulnerabilities found'
-//                 HAS_VANUARABLE_DEPENDENCIES = true
-//             } else {
-//                 echo 'No vulnerabilities found'
-//             }
-
-            when{
-                expression {
-                    fileExists('target/rewrite/datatables/*/org.openrewrite.java.dependencies.table.VulnerabilityReport.csv')
-                }
-            }
-
+        stage('Check Vulnerability Report Existence') {
             steps {
                 script {
-                    HAS_VANUARABLE_DEPENDENCIES = true
-                    echo 'Reading the vulnerabilities report'
-//                     how to read the csv file
-                    echo readFile('target/rewrite/datatables/*/org.openrewrite.java.dependencies.table.VulnerabilityReport.csv')
+                    def reportExists = sh(script: "find ./target -type f -name 'org.openrewrite.java.dependencies.table.VulnerabilityReport.csv'", returnStdout: true).trim()
+                    if (reportExists) {
+                        echo 'Vulnerability report found'
+                        HAS_VANUARABLE_DEPENDENCIES = true
+//                         how to read the csv file
+                        echo readFile(reportExists)
+
+                    } else {
+                        echo 'No vulnerability report found'
+                    }
                 }
             }
-
         }
+
+//         stage('read the vulnerabilities report') {
+//             when{
+//                 expression {
+//                     fileExists('target/rewrite/datatables/*/org.openrewrite.java.dependencies.table.VulnerabilityReport.csv')
+//                 }
+//             }
+//
+//             steps {
+//                 script {
+//                     HAS_VANUARABLE_DEPENDENCIES = true
+//                     echo 'Reading the vulnerabilities report'
+// //                     how to read the csv file
+//                     echo readFile('target/rewrite/datatables/*/org.openrewrite.java.dependencies.table.VulnerabilityReport.csv')
+//                 }
+//             }
+//
+//         }
 
         stage('Test') {
 
