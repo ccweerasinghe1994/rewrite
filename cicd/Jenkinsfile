@@ -40,6 +40,24 @@ pipeline {
                 }
             }
         }
+        stage('dependency-check') {
+//         here we will use maven versions plugin to check for dependency updates
+//         To display a list of plugin updates:
+            steps {
+                script {
+                    echo 'Checking for dependency updates'
+                    sh 'mvn versions:display-dependency-updates'
+                }
+            }
+//          To display a list of plugin updates:
+            steps {
+                script {
+                    echo 'Checking for plugin updates'
+                    sh 'mvn versions:display-plugin-updates'
+                }
+            }
+
+        }
         stage('Test') {
 
             when {
