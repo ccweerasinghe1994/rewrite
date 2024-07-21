@@ -21,15 +21,6 @@ pipeline {
      }
 
     stages {
-        stage('Init'){
-            steps {
-                echo "Init.."
-                script {
-                    gv = load('cicd/script.groovy')
-                }
-            }
-        }
-
         stage('Build') {
 
             when {
@@ -52,8 +43,6 @@ pipeline {
             }
         }
 
-
-
         stage('generate vulnerabilities report') {
 
             steps {
@@ -61,14 +50,6 @@ pipeline {
                     echo 'Checking for vulnerabilities'
                     sh 'mvn rewrite:run'
                 }
-
-                if (fileExists('target/rewrite/datatables/*/org.openrewrite.java.dependencies.table.VulnerabilityReport.csv')) {
-                    echo 'Vulnerabilities found'
-                    HAS_VANUARABLE_DEPENDENCIES = true
-                } else {
-                    echo 'No vulnerabilities found'
-                }
-
             }
 
         }
@@ -80,47 +61,12 @@ pipeline {
                     if (reportExists) {
                         echo 'Vulnerability report found'
                         HAS_VANUARABLE_DEPENDENCIES = true
-//                         how to read the csv file
-                        echo readFile(reportExists)
-
                     } else {
                         echo 'No vulnerability report found'
                     }
                 }
             }
         }
-
-//         stage('read the vulnerabilities report') {
-//             when{
-//                 expression {
-//                     fileExists('target/rewrite/datatables/*/org.openrewrite.java.dependencies.table.VulnerabilityReport.csv')
-//                 }
-//             }
-//
-//             steps {
-//                 script {
-//                     HAS_VANUARABLE_DEPENDENCIES = true
-//                     echo 'Reading the vulnerabilities report'
-// //                     how to read the csv file
-//                     echo readFile('target/rewrite/datatables/*/org.openrewrite.java.dependencies.table.VulnerabilityReport.csv')
-//                 }
-//             }
-//
-//         }
-
-        stage('Test') {
-
-            when {
-                expression { params.RUN_TESTS == true }
-            }
-            steps {
-                script {
-                    gv.testApp()
-                }
-            }
-        }
-
-
     }
 
     post {
