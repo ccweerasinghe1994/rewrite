@@ -42,17 +42,17 @@ pipeline {
                 }
             }
         }
-        stage('dependency-check') {
-            steps {
-                script {
-                    echo 'Checking for dependency updates'
-                    sh 'mvn versions:display-dependency-updates'
-                    echo 'Checking for plugin updates'
-                    sh 'mvn versions:display-plugin-updates'
-                }
-            }
-        }
-
+//         stage('dependency-check') {
+//             steps {
+//                 script {
+//                     echo 'Checking for dependency updates'
+//                     sh 'mvn versions:display-dependency-updates'
+//                     echo 'Checking for plugin updates'
+//                     sh 'mvn versions:display-plugin-updates'
+//                 }
+//             }
+//         }
+//
 
 
         stage('generate vulnerabilities report') {
@@ -81,39 +81,84 @@ pipeline {
                 }
             }
         }
-        stage('Print Vulnerability Report in JSON') {
-            steps {
-                script {
-                    def reportPath = sh(script: "find ./target -type f -name 'org.openrewrite.java.dependencies.table.VulnerabilityReport.csv'", returnStdout: true).trim()
-                    if (reportPath) {
-                        echo 'Vulnerability report found'
-                        HAS_VANUARABLE_DEPENDENCIES = true
+//         stage('Print Vulnerability Report in JSON') {
+//             steps {
+//                 script {
+//                     def reportPath = sh(script: "find ./target -type f -name 'org.openrewrite.java.dependencies.table.VulnerabilityReport.csv'", returnStdout: true).trim()
+//                     if (reportPath) {
+//                         echo 'Vulnerability report found'
+//                         HAS_VANUARABLE_DEPENDENCIES = true
+//
+//                         // Read CSV file
+//                         def csvContent = readFile(reportPath)
+//                         def lines = csvContent.split('\n')
+//                         def headers = lines[0].split(',')
+//                         def jsonList = []
+//
+//                         // Convert CSV to JSON
+//                         lines.tail().each { line ->
+//                             def data = line.split(',')
+//                             def jsonObject = [:]
+//                             headers.eachWithIndex { header, idx ->
+//                                 jsonObject[header.trim()] = data[idx].trim()
+//                             }
+//                             jsonList << jsonObject
+//                         }
+//
+//                         // Output JSON
+//                         echo JsonOutput.toJson(jsonList)
+//
+//                     } else {
+//                         echo 'No vulnerability report found'
+//                     }
+//                 }
+//             }
+//         }
 
-                        // Read CSV file
-                        def csvContent = readFile(reportPath)
-                        def lines = csvContent.split('\n')
-                        def headers = lines[0].split(',')
-                        def jsonList = []
+                stage('convert Vulnerability Report to markdown') {
+                    steps {
+                        script {
+                            def reportPath = sh(script: "find ./target -type f -name 'org.openrewrite.java.dependencies.table.VulnerabilityReport.csv'", returnStdout: true).trim()
+                            if (reportPath) {
+                                echo 'Vulnerability report found'
+                                HAS_VANUARABLE_DEPENDENCIES = true
 
-                        // Convert CSV to JSON
-                        lines.tail().each { line ->
-                            def data = line.split(',')
-                            def jsonObject = [:]
-                            headers.eachWithIndex { header, idx ->
-                                jsonObject[header.trim()] = data[idx].trim()
+                                // Read CSV file
+                                def csvContent = readFile(reportPath)
+                                def lines = csvContent.split('\n')
+                                def headers = lines[0].split(',')
+                                def markdown = ''
+
+                                // Convert CSV to markdown
+                                headers.each { header ->
+                                    markdown += "| ${header} "
+                                }
+                                markdown += "|\n"
+                                headers.each { header ->
+                                    markdown += "| --- "
+                                }
+                                markdown += "|\n"
+
+                                lines.tail().each { line ->
+                                    def data = line.split(',')
+                                    headers.eachWithIndex { header, idx ->
+                                        markdown += "| ${data[idx].trim()} "
+                                    }
+                                    markdown += "|\n"
+                                }
+
+                                // Output markdown
+                                echo markdown
+
+
+
+
+                            } else {
+                                echo 'No vulnerability report found'
                             }
-                            jsonList << jsonObject
                         }
-
-                        // Output JSON
-                        echo JsonOutput.toJson(jsonList)
-
-                    } else {
-                        echo 'No vulnerability report found'
                     }
                 }
-            }
-        }
 
 
     }
