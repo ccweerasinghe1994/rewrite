@@ -75,8 +75,11 @@
                 <version>5.36.0</version>
                 <configuration>
                     <exportDatatables>true</exportDatatables>
+                    <!--                    <overrideTransitive>false</overrideTransitive>-->
+                    <!--                    <addMarkers>true</addMarkers>-->
                     <activeRecipes>
-                        <recipe>org.openrewrite.java.dependencies.DependencyVulnerabilityCheck</recipe>
+                        <!--                        <recipe>org.openrewrite.java.dependencies.DependencyVulnerabilityCheck</recipe>-->
+                        <recipe>com.yourorg.UseSlf4jSimple</recipe>
                     </activeRecipes>
                 </configuration>
                 <dependencies>

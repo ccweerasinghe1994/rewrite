@@ -1,0 +1,12 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: com.yourorg.UseSlf4jSimple
+displayName: Use slf4j Simple
+recipeList:
+  - org.openrewrite.maven.ExcludeDependency:
+      groupId: ch.qos.logback
+      artifactId: logback-classic
+  - org.openrewrite.maven.AddDependency:
+      groupId: org.slf4j
+      artifactId: slf4j-simple
+      version: 1.7.X
