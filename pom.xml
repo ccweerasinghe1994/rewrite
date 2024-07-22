@@ -78,8 +78,8 @@
                     <!--                    <overrideTransitive>false</overrideTransitive>-->
                     <!--                    <addMarkers>true</addMarkers>-->
                     <activeRecipes>
-                        <!--                        <recipe>org.openrewrite.java.dependencies.DependencyVulnerabilityCheck</recipe>-->
-                        <recipe>com.yourorg.UseSlf4jSimple</recipe>
+                        <recipe>org.openrewrite.java.dependencies.DependencyVulnerabilityCheck</recipe>
+                        <!--                        <recipe>com.yourorg.UseSlf4jSimple</recipe>-->
                     </activeRecipes>
                 </configuration>
                 <dependencies>
@@ -90,10 +90,39 @@
                     </dependency>
                 </dependencies>
             </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
                 <version>2.8.1</version> <!-- Use the latest version available -->
+                <configuration>
+                    <allowSnapshots>false</allowSnapshots>
+                    <generateBackupPoms>false</generateBackupPoms>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>update-parent</id>
+                        <goals>
+                            <goal>update-parent</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Set to true to allow the parent version to be updated to a snapshot version -->
+                            <allowSnapshots>false</allowSnapshots>
+                            <!-- Parent groupId and artifactId to specifically update spring-boot-starter-parent -->
+                            <parentGroupId>org.springframework.boot</parentGroupId>
+                            <parentArtifactId>spring-boot-starter-parent</parentArtifactId>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>update-dependencies</id>
+                        <goals>
+                            <goal>update-properties</goal>
+                        </goals>
+                        <configuration>
+                            <includes>org.springframework.boot:spring-boot-starter-*</includes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
